@@ -56,7 +56,7 @@ export function MaylinHero() {
       
       // Image Parallax
       gsap.to(imageRef.current, {
-          yPercent: isMobile ? 8 : 20, // Reduced intensity on mobile
+          yPercent: isMobile ? 3 : 20, // Significantly reduced intensity on mobile for performance
           ease: "none",
           force3D: true,
           scrollTrigger: {
@@ -69,7 +69,7 @@ export function MaylinHero() {
 
       // Text Parallax
       gsap.to(textContainerRef.current, {
-          yPercent: isMobile ? -5 : -20, // Reduced intensity on mobile
+          yPercent: isMobile ? -2 : -20, // Significantly reduced intensity on mobile
           opacity: 0,
           ease: "none",
           force3D: true,
@@ -97,6 +97,8 @@ export function MaylinHero() {
           ref={imageRef}
           src={HERO_IMAGE}
           alt="Maylin — La Nueva Era"
+          fetchPriority="high"
+          decoding="async"
           className="w-full h-[115%] md:h-[120%] object-cover-optimized object-top -mt-[5%] md:-mt-[10%] gpu-accelerated" // Slightly smaller and centered correctly for mobile
         />
       </div>

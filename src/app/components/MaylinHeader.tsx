@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Search, User, ShoppingBag } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { useCart } from "../context/CartContext";
 
 // ─────────────────────────────────────────────
@@ -122,10 +122,13 @@ export function MaylinHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { totalItems: cartCount, openCart } = useCart();
 
-  // Derived color: when scrolled (and menu closed) → dark; otherwise white
-  const isLight = isScrolled && !menuOpen;
+  const isHomePage = location.pathname === "/";
+
+  // Derived color: when scrolled (and menu closed) or on non-hompage → dark; otherwise white
+  const isLight = (!isHomePage || isScrolled) && !menuOpen;
   const textColor  = isLight ? "#0a0a0a"            : "#FAF8F5";
   const logoColor  = isLight ? "#0a0a0a"            : "#FAF8F5";
   const iconColor  = isLight ? "rgba(10,10,10,0.7)" : "rgba(250,248,245,0.75)";
@@ -151,21 +154,11 @@ export function MaylinHeader() {
       const currentY = window.scrollY;
       if (menuOpenRef.current) { lastScrollY.current = currentY; return; }
 
-      // Backdrop blur
+      // Always visible sticky header (only update backdrop)
       const nowScrolled = currentY > SCROLL_THRESHOLD;
       if (nowScrolled !== scrolledRef.current) {
         scrolledRef.current = nowScrolled;
         setIsScrolled(nowScrolled);
-      }
-
-      // Smart sticky: hide on down, show on up
-      const dir = currentY > lastScrollY.current ? "down" : "up";
-      if (dir === "down" && currentY > HIDE_THRESHOLD && !isHiddenRef.current) {
-        isHiddenRef.current = true;
-        gsap.to(headerRef.current, { y: "-110%", duration: 0.45, ease: "power3.in" });
-      } else if (dir === "up" && isHiddenRef.current) {
-        isHiddenRef.current = false;
-        gsap.to(headerRef.current, { y: "0%", duration: 0.52, ease: "power3.out" });
       }
 
       lastScrollY.current = currentY;
@@ -179,12 +172,6 @@ export function MaylinHeader() {
   const openMenu = useCallback(() => {
     menuOpenRef.current = true;
     setMenuOpen(true);
-
-    // If header was hidden by smart-sticky, bring it back first
-    if (isHiddenRef.current) {
-      isHiddenRef.current = false;
-      gsap.to(headerRef.current, { y: "0%", duration: 0.38, ease: "power3.out" });
-    }
 
     // Reveal overlay
     gsap.set(overlayRef.current, { display: "flex" });
@@ -309,12 +296,12 @@ export function MaylinHeader() {
           justifyContent: "space-between",
           paddingLeft: "clamp(20px, 4vw, 56px)",
           paddingRight: "clamp(20px, 4vw, 56px)",
-          backgroundColor: isScrolled && !menuOpen
+          backgroundColor: (!isHomePage || isScrolled) && !menuOpen
             ? "rgba(250,248,245,0.82)"
             : "transparent",
-          backdropFilter: isScrolled && !menuOpen ? "blur(15px)" : "none",
-          WebkitBackdropFilter: isScrolled && !menuOpen ? "blur(15px)" : "none",
-          borderBottom: isScrolled && !menuOpen
+          backdropFilter: (!isHomePage || isScrolled) && !menuOpen ? "blur(15px)" : "none",
+          WebkitBackdropFilter: (!isHomePage || isScrolled) && !menuOpen ? "blur(15px)" : "none",
+          borderBottom: (!isHomePage || isScrolled) && !menuOpen
             ? `1px solid ${borderClr}`
             : "1px solid transparent",
           transition:

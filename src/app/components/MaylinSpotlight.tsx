@@ -78,6 +78,8 @@ export function MaylinSpotlight() {
             <img
               src={SPOTLIGHT_IMAGE}
               alt="Maylin Editorial"
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover-optimized gpu-accelerated"
             />
           </div>

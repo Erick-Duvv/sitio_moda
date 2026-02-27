@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { Button } from "../components/ui/button";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Square, Columns2, LayoutGrid } from "lucide-react";
 
 // ─────────────────────────────────────────────
 // Price parser helper
@@ -63,6 +63,13 @@ export function ShopPage() {
   });
 
   const [sortOrder, setSortOrder] = useState("newest");
+  const [gridMode, setGridMode] = useState<"large" | "medium" | "small">("medium");
+
+  const gridClasses = {
+    large: "grid-cols-1 md:grid-cols-2 lg:grid-cols-2",
+    medium: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+    small: "grid-cols-2 md:grid-cols-4 lg:grid-cols-6",
+  };
 
   // ── Count active filters ──────────────────
   const activeFilterCount = useMemo(
@@ -134,43 +141,36 @@ export function ShopPage() {
   }, [filters, sortOrder]);
 
   return (
-    <div className="bg-white min-h-screen pt-24 pb-20 px-6 sm:px-8 md:px-14 lg:px-20">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="flex flex-col lg:flex-row gap-12">
-
-          {/* ── DESKTOP SIDEBAR ─────────────────── */}
-          <div className="hidden lg:block w-64 flex-shrink-0 sticky top-32 self-start">
-            <ShopSidebar filters={filters} setFilters={setFilters} />
-          </div>
+    <div className="bg-white min-h-screen pt-24 pb-0">
+      <div className="w-full">
+        <div className="flex flex-col">
 
           {/* ── MAIN CONTENT ────────────────────── */}
           <div className="flex-1 flex flex-col">
 
             {/* Header / Controls */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 px-4 md:px-8 border-b border-black/10 pb-4">
 
-              {/* Mobile Filter Button */}
-              <div className="lg:hidden">
+              {/* Full Filter Drawer Button */}
+              <div>
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="rounded-none border-black/20 uppercase tracking-widest text-xs h-11 px-6 font-medium relative"
-                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    <button
+                      className="flex items-center uppercase tracking-widest text-[#1A1A1A] hover:opacity-70 transition-opacity"
+                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.68rem", fontWeight: 500 }}
                     >
-                      <SlidersHorizontal className="mr-2 h-3 w-3" />
-                      Filtros
+                      FILTRAR Y ORDENAR
                       {activeFilterCount > 0 && (
                         <span
-                          className="ml-2 w-4 h-4 bg-[#117837] text-white flex items-center justify-center"
+                          className="ml-2 w-4 h-4 bg-[#117837] text-white flex items-center justify-center rounded-sm"
                           style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.46rem", fontWeight: 500 }}
                         >
                           {activeFilterCount}
                         </span>
                       )}
-                    </Button>
+                    </button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px] sm:w-[350px] p-6 pt-12 overflow-y-auto">
+                  <SheetContent side="top" className="w-full h-auto max-h-[85vh] p-8 md:p-12 overflow-y-auto">
                     <SheetHeader className="mb-8 text-left">
                       <SheetTitle
                         className="text-2xl font-normal"
@@ -193,27 +193,34 @@ export function ShopPage() {
                 </Sheet>
               </div>
 
-              {/* Sorting */}
-              <div className="ml-auto w-[200px]">
-                <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger
-                    className="w-full rounded-none border-transparent hover:border-black/10 text-right justify-end gap-2 focus:ring-0 px-0 h-11"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    <span className="text-black/40 text-xs uppercase tracking-widest mr-1">Ordenar:</span>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent align="end" className="rounded-none border-black/10">
-                    <SelectItem value="newest" className="font-light text-sm">Más reciente</SelectItem>
-                    <SelectItem value="price_asc" className="font-light text-sm">Precio: menor a mayor</SelectItem>
-                    <SelectItem value="price_desc" className="font-light text-sm">Precio: mayor a menor</SelectItem>
-                  </SelectContent>
-                </Select>
+              {/* Grid Toggles */}
+              <div className="flex items-center gap-3 ml-auto">
+                <button 
+                  onClick={() => setGridMode("large")} 
+                  className="transition-opacity hover:opacity-100"
+                  style={{ opacity: gridMode === "large" ? 1 : 0.3 }}
+                >
+                  <Square size={16} strokeWidth={gridMode === "large" ? 1.5 : 1} />
+                </button>
+                <button 
+                  onClick={() => setGridMode("medium")} 
+                  className="transition-opacity hover:opacity-100"
+                  style={{ opacity: gridMode === "medium" ? 1 : 0.3 }}
+                >
+                  <Columns2 size={18} strokeWidth={gridMode === "medium" ? 1.5 : 1} />
+                </button>
+                <button 
+                  onClick={() => setGridMode("small")} 
+                  className="transition-opacity hover:opacity-100 hidden md:block"
+                  style={{ opacity: gridMode === "small" ? 1 : 0.3 }}
+                >
+                  <LayoutGrid size={18} strokeWidth={gridMode === "small" ? 1.5 : 1} />
+                </button>
               </div>
             </div>
 
             {/* Active filter pills + count (desktop) */}
-            <div className="flex flex-wrap items-center gap-2 mb-6 min-h-[28px]">
+            <div className="flex flex-wrap items-center gap-2 mb-6 min-h-[28px] px-4 md:px-8">
               {/* Results count */}
               <span
                 className="text-black/35 mr-2"
@@ -241,14 +248,18 @@ export function ShopPage() {
               )}
             </div>
 
-            {/* Product Grid */}
+            {/* Product Grid Container */}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10">
-                {filteredProducts.map((product) => (
-                  <Link key={product.id} to={`/producto/${product.id}`} className="w-full">
-                    <ShopProductCard product={product} />
-                  </Link>
-                ))}
+              <div className={`w-full transition-padding duration-500 ${gridMode === "large" ? "lg:px-[15%] xl:px-[20%] 2xl:px-[25%]" : "px-0"}`}>
+                <div className={`grid ${gridClasses[gridMode]} gap-[1px] bg-black/10 border-t border-b border-black/10 w-full`}>
+                  {filteredProducts.map((product) => (
+                    <div key={product.id} className={`bg-white h-full flex flex-col pt-0 ${gridMode === "small" ? "pb-0" : "pb-4"}`}>
+                      <Link to={`/producto/${product.id}`} className="w-full flex-1">
+                        <ShopProductCard product={product} compact={gridMode === "small"} gridMode={gridMode} />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               /* Empty state */

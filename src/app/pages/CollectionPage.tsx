@@ -8,16 +8,7 @@ import { MaylinFooter } from "../components/MaylinFooter";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ─────────────────────────────────────────────
-// Filter Data
-// ─────────────────────────────────────────────
-const FILTER_CATEGORIES = [
-  { label: "Talla",    options: ["XS", "S", "M", "L", "XL"] },
-  { label: "Color",    options: ["Crema", "Negro", "Arena", "Topo", "Ivory"] },
-  { label: "Silueta",  options: ["Recto", "Fluido", "Estructurado", "Oversized"] },
-  { label: "Precio",   options: ["— 200€", "200 – 400€", "400€ +"] },
-  { label: "Categoría",options: ["Vestidos", "Abrigos", "Pantalones", "Blusas", "Conjuntos"] },
-];
+import { Link } from "react-router";
 
 // ─────────────────────────────────────────────
 // Product Data
@@ -152,37 +143,13 @@ export function CollectionPage() {
   const pageRef       = useRef<HTMLDivElement>(null);
   const heroTitleRef  = useRef<HTMLHeadingElement>(null);
   const heroDescRef   = useRef<HTMLDivElement>(null);
-  const filterBarRef  = useRef<HTMLDivElement>(null);
-  const filterPanelRef= useRef<HTMLDivElement>(null);
   const gridRef       = useRef<HTMLDivElement>(null);
   const pauseRef      = useRef<HTMLDivElement>(null);
   const typoRef       = useRef<HTMLDivElement>(null);
 
-  const [activeOptions, setActiveOptions] = useState<Record<string, string[]>>({});
-  const [filterOpen, setFilterOpen]       = useState(false);
-
-  const toggleOption = (category: string, option: string) => {
-    setActiveOptions(prev => {
-      const current = prev[category] ?? [];
-      return {
-        ...prev,
-        [category]: current.includes(option)
-          ? current.filter(o => o !== option)
-          : [...current, option],
-      };
-    });
-  };
-
-  const clearFilters = () => setActiveOptions({});
-  const totalActive = Object.values(activeOptions).flat().length;
-
   // ── GSAP entrance + scroll animations ────────
   useGSAP(
     () => {
-      // Init filter panel closed
-      if (filterPanelRef.current) {
-        gsap.set(filterPanelRef.current, { height: 0, overflow: "hidden" });
-      }
 
       // Hero title char reveal
       if (heroTitleRef.current) {
@@ -200,15 +167,6 @@ export function CollectionPage() {
           heroDescRef.current,
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.9, ease: "power2.out", delay: 0.7 }
-        );
-      }
-
-      // Filter bar fade
-      if (filterBarRef.current) {
-        gsap.fromTo(
-          filterBarRef.current,
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.8, ease: "power2.out", delay: 0.95 }
         );
       }
 
@@ -266,20 +224,6 @@ export function CollectionPage() {
       }
     },
     { scope: pageRef }
-  );
-
-  // ── Filter panel open/close (GSAP) ───────────
-  useGSAP(
-    () => {
-      if (!filterPanelRef.current) return;
-      gsap.to(filterPanelRef.current, {
-        height: filterOpen ? "auto" : 0,
-        duration: filterOpen ? 0.48 : 0.32,
-        ease: filterOpen ? "power3.out" : "power3.in",
-        overwrite: true,
-      });
-    },
-    { dependencies: [filterOpen] }
   );
 
   // Split title into chars for mask reveal
@@ -376,220 +320,7 @@ export function CollectionPage() {
         </div>
       </section>
 
-      {/* ── FILTER UTILITY BAR ──────────────────── */}
-      <div
-        ref={filterBarRef}
-        className="px-6 sm:px-8 md:px-14"
-        style={{ opacity: 0 }}
-      >
-        {/* Top rule */}
-        <div style={{ width: "100%", height: "1px", backgroundColor: "rgba(10,10,10,0.12)", marginBottom: "18px" }} />
 
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          {/* Left: filter controls */}
-          <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-            {/* Filtrar toggle */}
-            <button
-              onClick={() => setFilterOpen(v => !v)}
-              className="flex items-center gap-1.5 group"
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.6rem",
-                fontWeight: 400,
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: filterOpen ? "#0a0a0a" : "rgba(10,10,10,0.45)",
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                transition: "color 0.2s ease",
-              }}
-            >
-              <SlidersHorizontal
-                size={11}
-                strokeWidth={1.5}
-                style={{
-                  transform: filterOpen ? "rotate(90deg)" : "rotate(0deg)",
-                  transition: "transform 0.3s ease",
-                }}
-              />
-              Filtrar
-              {totalActive > 0 && (
-                <span style={{ color: "#0a0a0a", marginLeft: "2px" }}>({totalActive})</span>
-              )}
-            </button>
-
-            <span
-              style={{ width: "1px", height: "14px", backgroundColor: "rgba(10,10,10,0.15)", display: "inline-block" }}
-            />
-
-            {/* Category quick-select */}
-            {FILTER_CATEGORIES.map(cat => {
-              const count = (activeOptions[cat.label] ?? []).length;
-              const isActive = count > 0;
-              return (
-                <button
-                  key={cat.label}
-                  onClick={() => setFilterOpen(true)}
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: "0.6rem",
-                    fontWeight: isActive ? 500 : 400,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: isActive ? "#0a0a0a" : "rgba(10,10,10,0.45)",
-                    background: "none",
-                    border: "none",
-                    padding: 0,
-                    cursor: "pointer",
-                    textDecoration: isActive ? "underline" : "none",
-                    textUnderlineOffset: "4px",
-                    transition: "color 0.2s ease",
-                  }}
-                >
-                  {cat.label}
-                  {isActive && (
-                    <span style={{ marginLeft: "3px", opacity: 0.6 }}>({count})</span>
-                  )}
-                </button>
-              );
-            })}
-
-            {/* Clear */}
-            {totalActive > 0 && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1"
-                style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontSize: "0.58rem",
-                  fontWeight: 400,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: "rgba(10,10,10,0.4)",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  borderBottom: "1px solid rgba(10,10,10,0.2)",
-                  paddingBottom: "1px",
-                }}
-              >
-                <X size={8} strokeWidth={2} />
-                Limpiar
-              </button>
-            )}
-          </div>
-
-          {/* Product count */}
-          <p
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: "0.6rem",
-              fontWeight: 400,
-              letterSpacing: "0.2em",
-              color: "rgba(10,10,10,0.4)",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            42 Piezas
-          </p>
-        </div>
-
-        {/* Bottom rule */}
-        <div style={{ width: "100%", height: "1px", backgroundColor: "rgba(10,10,10,0.08)", marginTop: "18px" }} />
-      </div>
-
-      {/* ── FILTER PANEL (animated) ─────────────── */}
-      <div ref={filterPanelRef} style={{ overflow: "hidden" }}>
-        <div
-          className="px-6 sm:px-8 md:px-14 py-8"
-          style={{ borderBottom: "1px solid rgba(10,10,10,0.08)" }}
-        >
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-4">
-            {FILTER_CATEGORIES.map(cat => (
-              <div key={cat.label}>
-                <p
-                  className="mb-4"
-                  style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: "0.52rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.28em",
-                    textTransform: "uppercase",
-                    color: "rgba(10,10,10,0.35)",
-                  }}
-                >
-                  {cat.label}
-                </p>
-                <div className="flex flex-col gap-2.5">
-                  {cat.options.map(option => {
-                    const isSelected = (activeOptions[cat.label] ?? []).includes(option);
-                    return (
-                      <button
-                        key={option}
-                        onClick={() => toggleOption(cat.label, option)}
-                        style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          fontSize: "0.65rem",
-                          fontWeight: isSelected ? 500 : 300,
-                          letterSpacing: "0.1em",
-                          color: isSelected ? "#0a0a0a" : "rgba(10,10,10,0.55)",
-                          background: "none",
-                          border: "none",
-                          padding: 0,
-                          textAlign: "left",
-                          cursor: "pointer",
-                          textDecoration: isSelected ? "underline" : "none",
-                          textUnderlineOffset: "4px",
-                          transition: "color 0.2s ease",
-                        }}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Apply row */}
-          <div className="mt-8 flex items-center justify-between">
-            <p
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.55rem",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: "rgba(10,10,10,0.3)",
-              }}
-            >
-              {totalActive} {totalActive === 1 ? "filtro activo" : "filtros activos"}
-            </p>
-            <button
-              onClick={() => setFilterOpen(false)}
-              style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "0.58rem",
-                fontWeight: 400,
-                letterSpacing: "0.22em",
-                textTransform: "uppercase",
-                color: "#0a0a0a",
-                background: "none",
-                border: "1px solid rgba(10,10,10,0.25)",
-                padding: "8px 20px",
-                cursor: "pointer",
-                transition: "border-color 0.2s ease",
-              }}
-            >
-              Aplicar
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* ── BROKEN GRID ─────────────────────────── */}
       <div
@@ -605,7 +336,9 @@ export function CollectionPage() {
         >
           {/* Large — 65% */}
           <div className="w-full md:w-[65%]">
-            <ProductCard product={PRODUCTS[0]} style={{ width: "100%" }} />
+            <Link to={`/producto/${PRODUCTS[0].id}`} className="block w-full">
+              <ProductCard product={PRODUCTS[0]} style={{ width: "100%" }} />
+            </Link>
           </div>
 
           {/* Small — 35%, offset up */}
@@ -623,14 +356,18 @@ export function CollectionPage() {
             >
               002 — Abrigos
             </p>
-            <ProductCard product={PRODUCTS[1]} style={{ width: "100%" }} />
+            <Link to={`/producto/${PRODUCTS[1].id}`} className="block w-full">
+              <ProductCard product={PRODUCTS[1]} style={{ width: "100%" }} />
+            </Link>
           </div>
         </div>
 
         {/* ── ROW 2 — Three Equal ── */}
         <div className="grid-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
           {PRODUCTS.slice(2, 5).map(p => (
-            <ProductCard key={p.id} product={p} />
+            <Link key={p.id} to={`/producto/${p.id}`} className="block w-full">
+              <ProductCard product={p} />
+            </Link>
           ))}
         </div>
 
@@ -711,19 +448,25 @@ export function CollectionPage() {
             >
               006 — Vestidos
             </p>
-            <ProductCard product={PRODUCTS[5]} style={{ width: "100%" }} />
+            <Link to={`/producto/${PRODUCTS[5].id}`} className="block w-full">
+              <ProductCard product={PRODUCTS[5]} style={{ width: "100%" }} />
+            </Link>
           </div>
 
           {/* Large — 65% */}
           <div className="w-full md:w-[65%]">
-            <ProductCard product={PRODUCTS[6]} style={{ width: "100%" }} />
+            <Link to={`/producto/${PRODUCTS[6].id}`} className="block w-full">
+              <ProductCard product={PRODUCTS[6]} style={{ width: "100%" }} />
+            </Link>
           </div>
         </div>
 
         {/* ── ROW 4 — Three Equal ── */}
         <div className="grid-item grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
           {PRODUCTS.slice(7, 10).map(p => (
-            <ProductCard key={p.id} product={p} />
+            <Link key={p.id} to={`/producto/${p.id}`} className="block w-full">
+              <ProductCard product={p} />
+            </Link>
           ))}
         </div>
 
@@ -805,7 +548,9 @@ export function CollectionPage() {
               key={p.id}
               style={{ marginTop: i === 1 ? "clamp(40px, 5vw, 80px)" : "0" }}
             >
-              <ProductCard product={p} />
+              <Link to={`/producto/${p.id}`} className="block w-full">
+                <ProductCard product={p} />
+              </Link>
             </div>
           ))}
 

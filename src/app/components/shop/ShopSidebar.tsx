@@ -41,12 +41,12 @@ export function ShopSidebar({ filters, setFilters, className = "" }: ShopSidebar
   };
 
   return (
-    <aside className={`w-64 flex-shrink-0 ${className}`}>
-      <Accordion type="multiple" defaultValue={["Colección", "Talla", "Color", "Precio"]} className="w-full">
+    <aside className={`w-full ${className}`}>
+      <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
         {Object.entries(FILTER_OPTIONS).map(([category, options]) => (
-          <AccordionItem key={category} value={category} className="border-b border-black/10">
-            <AccordionTrigger 
-              className="py-4 hover:no-underline hover:opacity-70 transition-opacity"
+          <div key={category} className="flex flex-col">
+            <h3 
+              className="py-4 border-b border-black/10 mb-4"
               style={{
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "1.1rem",
@@ -55,40 +55,38 @@ export function ShopSidebar({ filters, setFilters, className = "" }: ShopSidebar
               }}
             >
               {category}
-            </AccordionTrigger>
-            <AccordionContent className="pb-4">
-              <div className="flex flex-col gap-2">
-                {options.map((option) => {
-                  const isSelected = filters[category as keyof FilterState].includes(option);
-                  return (
-                    <button
-                      key={option}
-                      onClick={() => toggleFilter(category as keyof FilterState, option)}
-                      className="flex items-center gap-3 text-left group"
+            </h3>
+            <div className="flex flex-col gap-3">
+              {options.map((option) => {
+                const isSelected = filters[category as keyof FilterState].includes(option);
+                return (
+                  <button
+                    key={option}
+                    onClick={() => toggleFilter(category as keyof FilterState, option)}
+                    className="flex items-center gap-3 text-left group"
+                  >
+                    <div 
+                      className={`w-4 h-4 border flex items-center justify-center transition-colors ${
+                        isSelected ? "border-[#1A1A1A] bg-[#1A1A1A]" : "border-black/20 group-hover:border-black/40"
+                      }`}
                     >
-                      <div 
-                        className={`w-4 h-4 border flex items-center justify-center transition-colors ${
-                          isSelected ? "border-[#1A1A1A] bg-[#1A1A1A]" : "border-black/20 group-hover:border-black/40"
-                        }`}
-                      >
-                        {isSelected && <Check size={10} color="white" />}
-                      </div>
-                      <span 
-                        className={`text-sm tracking-wide transition-colors ${
-                          isSelected ? "text-[#1A1A1A] font-medium" : "text-black/60 group-hover:text-black/80"
-                        }`}
-                        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                      >
-                        {option}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+                      {isSelected && <Check size={10} color="white" />}
+                    </div>
+                    <span 
+                      className={`text-sm tracking-wide transition-colors ${
+                        isSelected ? "text-[#1A1A1A] font-medium" : "text-black/60 group-hover:text-black/80"
+                      }`}
+                      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    >
+                      {option}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         ))}
-      </Accordion>
+      </div>
     </aside>
   );
 }

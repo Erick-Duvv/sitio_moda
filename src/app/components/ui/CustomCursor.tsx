@@ -30,7 +30,10 @@ export function CustomCursor() {
       yTo(e.clientY);
     };
 
-    window.addEventListener("mousemove", moveCursor);
+    const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    if (!isTouch) {
+      window.addEventListener("mousemove", moveCursor);
+    }
 
     // Global hover listener
     const handleMouseOver = (e: MouseEvent) => {
@@ -46,11 +49,15 @@ export function CustomCursor() {
       }
     };
 
-    document.addEventListener("mouseover", handleMouseOver);
+    if (!isTouch) {
+      document.addEventListener("mouseover", handleMouseOver);
+    }
 
     return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      document.removeEventListener("mouseover", handleMouseOver);
+      if (!isTouch) {
+        window.removeEventListener("mousemove", moveCursor);
+        document.removeEventListener("mouseover", handleMouseOver);
+      }
     };
   }, []);
 
@@ -92,38 +99,5 @@ export function CustomCursor() {
     }
   }, [isHovering]);
 
-  return (
-    <>
-      <style>{`
-        body, a, button, [role="button"] {
-          cursor: none !important;
-        }
-        @media (hover: none) {
-          body, a, button, [role="button"] {
-            cursor: auto !important;
-          }
-          .custom-cursor {
-            display: none !important;
-          }
-        }
-      `}</style>
-      <div
-        ref={cursorRef}
-        className="custom-cursor fixed top-0 left-0 rounded-full pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
-        style={{ 
-          width: 12, 
-          height: 12, 
-          backgroundColor: "#ffffff"
-        }}
-      >
-        <span
-          ref={cursorTextRef}
-          className="text-black text-[10px] uppercase font-bold tracking-widest opacity-0 whitespace-nowrap"
-          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-        >
-          {cursorText}
-        </span>
-      </div>
-    </>
-  );
+  return null;
 }
